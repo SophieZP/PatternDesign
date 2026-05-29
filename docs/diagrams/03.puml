@@ -1,0 +1,47 @@
+@startuml
+title 03 - Abstract Factory
+skinparam classAttributeIconSize 0
+
+class AbstractFactoryHandler {
+  +demo(): String
+}
+
+abstract class UIComponent {
+  +render(): String
+}
+
+class Button {
+  -style: String
+  +Button(style: String)
+  +render(): String
+}
+
+class Card {
+  -style: String
+  +Card(style: String)
+  +render(): String
+}
+
+abstract class UIFactory {
+  +createButton(): Button
+  +createCard(): Card
+}
+
+class WebUIFactory {
+  +createButton(): Button
+  +createCard(): Card
+}
+
+class MobileUIFactory {
+  +createButton(): Button
+  +createCard(): Card
+}
+
+UIComponent <|-- Button
+UIComponent <|-- Card
+UIFactory <|-- WebUIFactory
+UIFactory <|-- MobileUIFactory
+AbstractFactoryHandler ..> UIFactory
+AbstractFactoryHandler ..> WebUIFactory
+AbstractFactoryHandler ..> MobileUIFactory
+@enduml

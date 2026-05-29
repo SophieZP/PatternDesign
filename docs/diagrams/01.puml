@@ -1,0 +1,25 @@
+@startuml
+title 01 - Singleton
+skinparam classAttributeIconSize 0
+
+class SingletonHandler {
+	+demo(): String
+}
+
+class ConfigManager {
+	-INSTANCE: ConfigManager {static}
+	-databaseHost: String
+	-paymentApiKey: String
+	-maxGuests: int
+	-ConfigManager()
+	+getInstance(): ConfigManager {static}
+	+getDatabaseHost(): String
+	+setDatabaseHost(databaseHost: String): void
+	+getPaymentApiKey(): String
+	+setPaymentApiKey(paymentApiKey: String): void
+	+getMaxGuests(): int
+	+setMaxGuests(maxGuests: int): void
+}
+
+SingletonHandler ..> ConfigManager : usa
+@enduml

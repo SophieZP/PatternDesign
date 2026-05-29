@@ -1,0 +1,34 @@
+@startuml
+title 16 - Iterator
+skinparam classAttributeIconSize 0
+
+class IteratorHandler {
+  +demo(): String
+}
+
+class Listing {
+  -name: String
+  +Listing(name: String)
+}
+
+class ListingCollection {
+  -listings: List<Listing>
+  +add(listing: Listing): void
+  +iterator(): Iterator<Listing>
+}
+
+class ListingIterator {
+  -listings: List<Listing>
+  -index: int
+  +hasNext(): boolean
+  +next(): Listing
+  +remove(): void
+}
+
+ListingCollection ..|> Iterable
+ListingIterator ..|> Iterator
+ListingCollection o-- Listing
+ListingIterator o-- Listing
+IteratorHandler ..> ListingCollection
+IteratorHandler ..> ListingIterator
+@enduml

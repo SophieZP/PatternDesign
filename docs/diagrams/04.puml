@@ -1,0 +1,42 @@
+@startuml
+title 04 - Builder
+skinparam classAttributeIconSize 0
+
+class BuilderHandler {
+  +demo(): String
+}
+
+class Listing {
+  -title: String
+  -description: String
+  -pricePerNight: double
+  -capacity: int
+  -amenities: List<String>
+  -houseRules: List<String>
+  -cancellationPolicy: String
+  -Listing(builder: Builder)
+  +toSummary(): String
+}
+
+class Builder {
+  -title: String
+  -description: String
+  -pricePerNight: double
+  -capacity: int
+  -amenities: List<String>
+  -houseRules: List<String>
+  -cancellationPolicy: String
+  +title(title: String): Builder
+  +description(description: String): Builder
+  +pricePerNight(pricePerNight: double): Builder
+  +capacity(capacity: int): Builder
+  +addAmenity(amenity: String): Builder
+  +houseRule(rule: String): Builder
+  +cancellationPolicy(cancellationPolicy: String): Builder
+  +build(): Listing
+}
+
+Listing *-- Builder : se construye con
+BuilderHandler ..> Listing
+BuilderHandler ..> Builder
+@enduml

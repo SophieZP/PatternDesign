@@ -1,0 +1,40 @@
+@startuml
+title 21 - Strategy
+skinparam classAttributeIconSize 0
+
+class StrategyHandler {
+  +demo(): String
+}
+
+interface PricingStrategy {
+  +calculate(basePrice: double, nights: int): double
+}
+
+class SeasonalPricing {
+  +calculate(basePrice: double, nights: int): double
+}
+
+class DurationPricing {
+  +calculate(basePrice: double, nights: int): double
+}
+
+class PromoPricing {
+  +calculate(basePrice: double, nights: int): double
+}
+
+class PricingContext {
+  -strategy: PricingStrategy
+  +PricingContext(strategy: PricingStrategy)
+  +setStrategy(strategy: PricingStrategy): void
+  +calculate(basePrice: double, nights: int): double
+}
+
+PricingStrategy <|.. SeasonalPricing
+PricingStrategy <|.. DurationPricing
+PricingStrategy <|.. PromoPricing
+PricingContext o-- PricingStrategy
+StrategyHandler ..> PricingContext
+StrategyHandler ..> SeasonalPricing
+StrategyHandler ..> DurationPricing
+StrategyHandler ..> PromoPricing
+@enduml

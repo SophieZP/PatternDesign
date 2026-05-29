@@ -1,0 +1,38 @@
+@startuml
+title 14 - Command
+skinparam classAttributeIconSize 0
+
+class CommandHandler {
+  +demo(): String
+}
+
+abstract class BookingCommand {
+  #reservationId: String
+  #BookingCommand(reservationId: String)
+  +execute(): String
+  +undo(): String
+}
+
+class CreateBookingCommand {
+  +execute(): String
+  +undo(): String
+}
+
+class CancelBookingCommand {
+  +execute(): String
+  +undo(): String
+}
+
+class BookingInvoker {
+  -history: List<String>
+  +execute(command: BookingCommand): void
+  +history(): String
+}
+
+BookingCommand <|-- CreateBookingCommand
+BookingCommand <|-- CancelBookingCommand
+BookingInvoker o-- BookingCommand
+CommandHandler ..> BookingInvoker
+CommandHandler ..> CreateBookingCommand
+CommandHandler ..> CancelBookingCommand
+@enduml

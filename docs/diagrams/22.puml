@@ -1,0 +1,33 @@
+@startuml
+title 22 - Template Method
+skinparam classAttributeIconSize 0
+
+class TemplateMethodHandler {
+  +demo(): String
+}
+
+abstract class CheckInProcess {
+  +run(): String
+  #verifyIdentity(): String
+  #assignRoom(): String
+  #deliverKeys(): String
+}
+
+class StandardCheckInProcess {
+  #verifyIdentity(): String
+  #assignRoom(): String
+  #deliverKeys(): String
+}
+
+class LuxuryCheckInProcess {
+  #verifyIdentity(): String
+  #assignRoom(): String
+  #deliverKeys(): String
+}
+
+CheckInProcess <|-- StandardCheckInProcess
+CheckInProcess <|-- LuxuryCheckInProcess
+TemplateMethodHandler ..> CheckInProcess
+TemplateMethodHandler ..> StandardCheckInProcess
+TemplateMethodHandler ..> LuxuryCheckInProcess
+@enduml

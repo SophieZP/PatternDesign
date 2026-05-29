@@ -1,0 +1,36 @@
+@startuml
+title 13 - Chain of Responsibility
+skinparam classAttributeIconSize 0
+
+class ChainHandler {
+  +demo(): String
+}
+
+abstract class ReviewHandler {
+  #next: ReviewHandler
+  #ReviewHandler(next: ReviewHandler)
+  +handle(review: String): String
+  #isAllowed(review: String): boolean
+  #getName(): String
+}
+
+class SpamFilter {
+  +SpamFilter(next: ReviewHandler)
+}
+
+class ProfanityFilter {
+  +ProfanityFilter(next: ReviewHandler)
+}
+
+class LengthFilter {
+  +LengthFilter(next: ReviewHandler)
+}
+
+ReviewHandler <|-- SpamFilter
+ReviewHandler <|-- ProfanityFilter
+ReviewHandler <|-- LengthFilter
+ReviewHandler o-- ReviewHandler : next
+ChainHandler ..> SpamFilter
+ChainHandler ..> ProfanityFilter
+ChainHandler ..> LengthFilter
+@enduml

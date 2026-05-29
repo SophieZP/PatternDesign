@@ -1,0 +1,27 @@
+{
+  "patterns": [
+    {"code": "01", "name": "Singleton", "description": "Única instancia de configuración global."},
+    {"code": "02", "name": "Factory Method", "description": "Creación encapsulada de notificaciones."},
+    {"code": "03", "name": "Abstract Factory", "description": "Familias de componentes UI para web y móvil."},
+    {"code": "04", "name": "Builder", "description": "Construcción paso a paso de un listing."},
+    {"code": "05", "name": "Prototype", "description": "Clonado de listings base con cambios mínimos."},
+    {"code": "06", "name": "Adapter", "description": "Adaptación de pasarelas de pago heterogéneas."},
+    {"code": "07", "name": "Bridge", "description": "Separación entre filtros e implementaciones."},
+    {"code": "08", "name": "Composite", "description": "Jerarquía uniforme de propiedades y grupos."},
+    {"code": "09", "name": "Decorator", "description": "Amenidades agregadas dinámicamente a un listing."},
+    {"code": "10", "name": "Facade", "description": "Acceso unificado a pagos, reservas y notificaciones."},
+    {"code": "11", "name": "Flyweight", "description": "Reuso de iconos de amenidades."},
+    {"code": "12", "name": "Proxy", "description": "Control de acceso a perfiles sensibles."},
+    {"code": "13", "name": "Chain of Responsibility", "description": "Cadena de validaciones para reseñas."},
+    {"code": "14", "name": "Command", "description": "Solicitudes de reserva encapsuladas como objetos."},
+    {"code": "15", "name": "Interpreter", "description": "Interpretación de búsquedas tipo lenguaje natural."},
+    {"code": "16", "name": "Iterator", "description": "Recorrido de colecciones sin exponer su estructura."},
+    {"code": "17", "name": "Mediator", "description": "Comunicación centralizada en un chat."},
+    {"code": "18", "name": "Memento", "description": "Historial de estados de reservas."},
+    {"code": "19", "name": "Observer", "description": "Notificación de cambios de precio a huéspedes."},
+    {"code": "20", "name": "State", "description": "Comportamiento según estado de la reserva."},
+    {"code": "21", "name": "Strategy", "description": "Algoritmos de precio intercambiables."},
+    {"code": "22", "name": "Template Method", "description": "Esqueleto común del proceso de check-in."},
+    {"code": "23", "name": "Visitor", "description": "Operaciones sobre tipos concretos de propiedades."}
+  ]
+}

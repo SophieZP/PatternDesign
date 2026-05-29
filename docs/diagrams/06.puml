@@ -1,0 +1,37 @@
+@startuml
+title 06 - Adapter
+skinparam classAttributeIconSize 0
+
+class AdapterHandler {
+  +demo(): String
+}
+
+abstract class PaymentGateway {
+  +pay(amount: double): String
+}
+
+interface LegacyPaymentAPI {
+  +charge(amount: double): String
+}
+
+class StripeAPI {
+  +charge(amount: double): String
+}
+
+class PayPalAPI {
+  +charge(amount: double): String
+}
+
+class PaymentAdapter {
+  -api: LegacyPaymentAPI
+  +PaymentAdapter(api: LegacyPaymentAPI)
+  +pay(amount: double): String
+}
+
+PaymentGateway <|-- PaymentAdapter
+LegacyPaymentAPI <|.. StripeAPI
+LegacyPaymentAPI <|.. PayPalAPI
+AdapterHandler ..> PaymentAdapter
+AdapterHandler ..> StripeAPI
+AdapterHandler ..> PayPalAPI
+@enduml

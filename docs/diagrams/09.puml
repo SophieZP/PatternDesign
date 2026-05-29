@@ -1,0 +1,41 @@
+@startuml
+title 09 - Decorator
+skinparam classAttributeIconSize 0
+
+class DecoratorHandler {
+  +demo(): String
+}
+
+abstract class Listing {
+  #name: String
+  #price: double
+  #Listing(name: String, price: double)
+  +description(): String
+}
+
+class BaseListing {
+  +description(): String
+}
+
+abstract class ListingDecorator {
+  #listing: Listing
+  #ListingDecorator(listing: Listing)
+}
+
+class WifiDecorator {
+  +description(): String
+}
+
+class PoolDecorator {
+  +description(): String
+}
+
+Listing <|-- BaseListing
+Listing <|-- ListingDecorator
+ListingDecorator <|-- WifiDecorator
+ListingDecorator <|-- PoolDecorator
+ListingDecorator o-- Listing
+DecoratorHandler ..> BaseListing
+DecoratorHandler ..> WifiDecorator
+DecoratorHandler ..> PoolDecorator
+@enduml
