@@ -1,0 +1,41 @@
+@startuml
+title 23 - Visitor
+skinparam classAttributeIconSize 0
+
+class VisitorHandler {
+  +demo(): String
+}
+
+interface PropertyVisitor {
+  +visitApartment(apartment: Apartment): double
+  +visitVilla(villa: Villa): double
+}
+
+abstract class PropertyElement {
+  #name: String
+  #basePrice: double
+  +accept(visitor: PropertyVisitor): double
+}
+
+class Apartment {
+  +accept(visitor: PropertyVisitor): double
+}
+
+class Villa {
+  +accept(visitor: PropertyVisitor): double
+}
+
+class RevenueVisitor {
+  +visitApartment(apartment: Apartment): double
+  +visitVilla(villa: Villa): double
+}
+
+PropertyVisitor <|.. RevenueVisitor
+PropertyElement <|-- Apartment
+PropertyElement <|-- Villa
+PropertyElement ..> PropertyVisitor
+VisitorHandler ..> PropertyVisitor
+VisitorHandler ..> Apartment
+VisitorHandler ..> Villa
+VisitorHandler ..> RevenueVisitor
+@enduml

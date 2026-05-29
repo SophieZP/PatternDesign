@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airbnb Patterns Lab</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <main class="shell">
+        <section class="hero" id="landingHero">
+            <div>
+                <p class="eyebrow">Backend + Frontend</p>
+                <h1>Patrones GoF de Airbnb</h1>
+                <p class="subtitle">Elige un patrón, ejecuta el backend y revisa la salida JSON desde una interfaz HTML ligera.</p>
+            </div>
+            <div class="status-card">
+                <span class="status-label">Estado del backend</span>
+                <strong id="backendStatus">Conectando...</strong>
+                <small>API local en http://localhost:8080</small>
+            </div>
+        </section>
+
+        <section class="landing" id="landingView">
+            <div class="tabs" role="tablist">
+                <button id="catalogTab" role="tab" aria-selected="true">Catálogo</button>
+                <button id="appTab" role="tab" aria-selected="false">Airbnb App</button>
+            </div>
+
+            <section class="panel catalog-panel" id="catalogPanel">
+                <div class="catalog-header">
+                    <h2>Catálogo de patrones</h2>
+                    <p>Haz clic en un patrón para abrir su front y su diagrama.</p>
+                </div>
+                <div id="catalogGrid" class="catalog-grid"></div>
+            </section>
+
+            <section class="panel app-panel" id="appPanel" hidden>
+                <div class="app-header">
+                    <div>
+                        <p class="eyebrow">Airbnb Demo</p>
+                        <h2>Mini App - Reservas</h2>
+                        <p class="subtitle">Interfaz embebida para probar escenarios del patrón seleccionado.</p>
+                    </div>
+                    <div id="appPatternBadge" class="pattern-badge">Ningún patrón aplicado</div>
+                </div>
+
+                <form id="appSearchForm" class="form app-form">
+                    <label>
+                        Ciudad
+                        <input id="appCity" placeholder="Ej: Barcelona">
+                    </label>
+                    <label>
+                        Noches
+                        <input id="appNights" type="number" min="1" value="2">
+                    </label>
+                    <label>
+                        Huéspedes
+                        <input id="appGuests" type="number" min="1" value="2">
+                    </label>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <button id="appSearchButton" type="button">Buscar</button>
+                        <button id="appResetButton" type="button" class="secondary-button">Reset</button>
+                    </div>
+                </form>
+
+                <div id="appListings" class="catalog-grid" style="margin-top:16px"></div>
+            </section>
+        </section>
+
+        <section class="detail-view" id="detailView" hidden>
+            <section class="panel detail-header">
+                <div>
+                    <p class="eyebrow">Patrón seleccionado</p>
+                    <h2 id="selectedPatternName">Patrón</h2>
+                    <p id="selectedPatternDescription" class="subtitle"></p>
+                </div>
+                <div style="display:flex;gap:8px">
+                    <button type="button" id="openInApp" class="secondary-button">Abrir en app</button>
+                    <button type="button" id="backToCatalog" class="secondary-button">Volver al catálogo</button>
+                </div>
+            </section>
+
+            <section class="layout">
+            <section class="panel control-panel">
+                <h2>Ejecutar patrón</h2>
+                <form id="patternForm" class="form">
+                    <label>
+                        Patrón
+                        <select id="patternSelect" required></select>
+                    </label>
+                    <label>
+                        Entrada opcional
+                        <textarea id="patternInput" rows="4" placeholder="Ejemplo: ciudad:Barcelona AND precio:<100"></textarea>
+                    </label>
+                    <button type="submit">Ejecutar backend</button>
+                </form>
+            </section>
+
+            <section class="panel output-panel">
+                <h2>Respuesta</h2>
+                <pre id="outputBox">Selecciona un patrón para comenzar.</pre>
+                <div class="output-meta" id="outputMeta"></div>
+            </section>
+
+            </section>
+
+            <section class="panel diagram-panel">
+                <div class="diagram-header">
+                    <h2>Diagrama .puml</h2>
+                    <p>Se carga desde <code>/diagrams/{código}.puml</code>.</p>
+                </div>
+                <pre id="diagramBox">Selecciona un patrón para ver su diagrama.</pre>
+            </section>
+        </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+</body>
+</html>

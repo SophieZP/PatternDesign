@@ -1,0 +1,22 @@
+@startuml
+title 05 - Prototype
+skinparam classAttributeIconSize 0
+
+class PrototypeHandler {
+  +demo(): String
+}
+
+class ListingPrototype {
+  -title: String
+  -room: String
+  -price: double
+  +ListingPrototype(title: String, room: String, price: double)
+  +copy(): ListingPrototype
+  +setRoom(room: String): void
+  +setPrice(price: double): void
+  +toSummary(): String
+}
+
+ListingPrototype ..|> Cloneable
+PrototypeHandler ..> ListingPrototype
+@enduml

@@ -1,0 +1,33 @@
+@startuml
+title 19 - Observer
+skinparam classAttributeIconSize 0
+
+class ObserverHandler {
+  +demo(): String
+}
+
+interface ListingObserver {
+  +update(listingName: String, newPrice: double): String
+}
+
+class GuestObserver {
+  -name: String
+  +GuestObserver(name: String)
+  +update(listingName: String, newPrice: double): String
+}
+
+class Listing {
+  -name: String
+  -price: double
+  -observers: List<ListingObserver>
+  -notifications: List<String>
+  +addObserver(observer: ListingObserver): void
+  +setPrice(price: double): void
+  +notifications(): String
+}
+
+ListingObserver <|.. GuestObserver
+Listing o-- ListingObserver
+ObserverHandler ..> Listing
+ObserverHandler ..> GuestObserver
+@enduml

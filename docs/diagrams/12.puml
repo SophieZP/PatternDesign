@@ -1,0 +1,31 @@
+@startuml
+title 12 - Proxy
+skinparam classAttributeIconSize 0
+
+class ProxyHandler {
+  +demo(): String
+}
+
+abstract class UserProfile {
+  +display(): String
+}
+
+class RealUserProfile {
+  -name: String
+  -email: String
+  -phone: String
+  +display(): String
+}
+
+class UserProfileProxy {
+  -realProfile: UserProfile
+  -role: String
+  +display(): String
+}
+
+UserProfile <|-- RealUserProfile
+UserProfile <|-- UserProfileProxy
+UserProfileProxy o-- UserProfile
+ProxyHandler ..> RealUserProfile
+ProxyHandler ..> UserProfileProxy
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+title 10 - Facade
+skinparam classAttributeIconSize 0
+
+class FacadeHandler {
+  +demo(): String
+}
+
+class BookingFacade {
+  -paymentService: PaymentService
+  -reservationService: ReservationService
+  -notificationService: NotificationService
+  +book(reservationId: String, amount: double, status: String): String
+}
+
+class PaymentService {
+  +pay(amount: double): String
+}
+
+class ReservationService {
+  +createReservation(reservationId: String): String
+}
+
+class NotificationService {
+  +notifyUser(status: String): String
+}
+
+BookingFacade *-- PaymentService
+BookingFacade *-- ReservationService
+BookingFacade *-- NotificationService
+FacadeHandler ..> BookingFacade
+@enduml

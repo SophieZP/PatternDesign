@@ -1,0 +1,71 @@
+
+# Situación del problema para los 23 patrones de diseño GoF
+
+## Patrón 01 — Singleton
+La aplicación necesita una única instancia de ConfigManager que mantenga la configuración global: host de base de datos, API key de pagos, número máximo de huéspedes por reserva. Si se crearan múltiples instancias, diferentes partes del sistema podrían trabajar con configuraciones inconsistentes.
+
+## Patrón 02 — Factory Method
+Airbnb envía notificaciones a sus usuarios por distintos canales: email, push notification y SMS. La lógica de creación de cada tipo de notificación debe estar encapsulada. Agregar un nuevo canal (por ejemplo, WhatsApp) no debe modificar el código existente.
+
+## Patrón 03 — Abstract Factory
+La aplicación web y la aplicación móvil de Airbnb necesitan componentes de UI diferentes: los botones y tarjetas tienen distinto estilo en web versus móvil, pero la lógica de construcción debe ser la misma. La Abstract Factory permite cambiar toda la familia de componentes con un solo cambio.
+
+## Patrón 04 — Builder
+Crear un Listing (anuncio de propiedad) implica muchos atributos opcionales: título, descripción, precio por noche, capacidad, lista de amenities, fotos, reglas de la casa, política de cancelación. El Builder permite construir el objeto paso a paso sin un constructor con 15 parámetros.
+
+## Patrón 05 — Prototype
+Un host tiene varias propiedades similares (por ejemplo, varios apartamentos en el mismo edificio). En lugar de configurar cada Listing desde cero, puede clonar una plantilla existente y solo modificar los detalles que cambian (número de habitación, piso, precio).
+
+## Patrón 06 — Adapter
+Airbnb integra múltiples pasarelas de pago. Stripe y PayPal tienen APIs completamente diferentes. El Adapter traduce la interfaz común PaymentGateway que usa Airbnb a la API específica de cada proveedor, sin que el resto del sistema sepa con cuál está hablando.
+
+## Patrón 07 — Bridge
+El motor de búsqueda de Airbnb tiene filtros (precio, ubicación, tipo de propiedad) y distintas implementaciones de cómo aplicarlos (búsqueda exacta, búsqueda aproximada, búsqueda por rango). El Bridge separa la abstracción del filtro de su implementación concreta.
+
+## Patrón 08 — Composite
+Airbnb necesita representar una jerarquía de propiedades donde una propiedad puede ser una habitación individual o un grupo de propiedades (como un apartamento con varias habitaciones). El Composite permite tratar de manera uniforme tanto a las propiedades individuales como a los grupos de propiedades.
+
+## Patrón 09 — Decorator
+Airbnb quiere agregar dinámicamente responsabilidades a un objeto, como agregar amenities (Wi-Fi, piscina, desayuno) a un listing existente sin modificar su estructura. El Decorator permite agregar comportamientos adicionales a un objeto de forma dinámica.
+
+## Patrón 10 — Facade
+Airbnb posee varios subsistemas complejos: servicio de pagos, servicio de reservas, servicio de notificaciones. El Facade proporciona una interfaz unificada y sencilla para que los clientes interactúen con estos subsistemas sin necesidad de conocer sus detalles internos.
+
+## Patrón 11 — Flyweight
+Airbnb necesita representar muchos objetos similares, como iconos de amenidades (Wi-Fi, cocina, aire acondicionado) que se reutilizan en múltiples listings. El Flyweight comparte partes comunes del estado entre múltiples objetos para ahorrar memoria.
+
+## Patrón 12 — Proxy
+Airbnb necesita controlar el acceso a objetos sensibles, como perfiles de usuario que contienen información personal. Un Proxy actúa como intermediario que controla el acceso al objeto real, añadiendo funcionalidades como lazy loading, control de acceso o registro.
+
+## Patrón 13 — Chain of Responsibility
+Airbnb procesa reseñas de huéspedes mediante una serie de validaciones (filtro de spam, filtro de groserías, filtro de longitud). En lugar de acoplar el remitente de la reseña a cada validador, se usa una cadena donde cada validador decide si procesa la solicitud o la pasa al siguiente.
+
+## Patrón 14 — Command
+Airbnb necesita encapsular solicitudes de reserva como objetos para poder parametrizar operaciones (crear, cancelar, modificar), encolarlas para procesamiento posterior o soportar operaciones deshacer/rehacer.
+
+## Patrón 15 — Interpreter
+Airbnb permite a los usuarios buscar propiedades usando expresiones como "ciudad:Barcelona AND precio:<100". El Interpreter define una gramática para estas expresiones de búsqueda y un intérprete que las evalúa.
+
+## Patrón 16 — Iterator
+Airbnb necesita recorrer colecciones de objetos (listings, usuarios, reservas) sin exponer su representación interna. El Iterator proporciona una forma de acceder secuencialmente a los elementos de un objeto agregado.
+
+## Patrón 17 — Mediator
+Airbnb tiene un sistema de chat donde usuarios (huéspedes y anfitriones) se comunican. En lugar de que los usuarios se refieran directamente entre sí, un Mediador centraliza la comunicación, reduciendo las dependencias entre ellos.
+
+## Patrón 18 — Memento
+Airbnb necesita permitir a los usuarios deshacer cambios en una reserva (por ejemplo, cambiar fechas) y volver a un estado anterior. El Memento captura el estado interno de una reserva sin violar el encapsulamiento, y un Caretaker se encarga de almacenarlo y restaurarlo.
+
+## Patrón 19 — Observer
+Airbnb debe notificar a los huéspedes interesados cuando el precio de un listing que están siguiendo baja o cambia. El Observer define una dependencia uno-a-muchos donde el sujeto (listing) notifica a sus observadores (huéspedes) de cualquier cambio de estado.
+
+## Patrón 20 — State
+Airbnb maneja reservas que pueden estar en distintos estados (pendiente, confirmada, cancelada). El comportamiento de una reserva (por ejemplo, permitir pago o cancelación) depende de su estado. El State permite que un objeto cambie su comportamiento cuando su estado interno cambia.
+
+## Patrón 21 — Strategy
+Airbnb necesita aplicar diferentes algoritmos de cálculo de precios según la temporada, duración de la estancia o promociones. El Strategy define una familia de algoritmos encapsulados y los hace intercambiables, permitiendo que el algoritmo varíe independientemente de los clientes que lo usan.
+
+## Patrón 22 — Template Method
+Airbnb tiene un proceso de check-in con pasos comunes (verificación de identidad, asignación de habitación, entrega de llaves) pero algunas etapas varían según el tipo de reserva (estándar vs lujo). El Template Method define el esqueleto del algoritmo y permite a las subclases redefinir ciertos pasos sin cambiar la estructura general.
+
+## Patrón 23 — Visitor
+Airbnb necesita realizar operaciones sobre una estructura de objetos de propiedades (apartamentos, villas) que dependen de la clase concreta de cada elemento (por ejemplo, cálculo de ingresos basado en tipo de propiedad). El Visitor permite definir una nueva operación sin cambiar las clases de los elementos sobre los que opera.

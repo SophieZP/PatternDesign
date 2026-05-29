@@ -1,0 +1,24 @@
+@startuml
+title 11 - Flyweight
+skinparam classAttributeIconSize 0
+
+class FlyweightHandler {
+  +demo(): String
+}
+
+class AmenityIcon {
+  -name: String
+  +AmenityIcon(name: String)
+  +render(listingId: int): String
+}
+
+class AmenityIconFactory {
+  -cache: Map<String, AmenityIcon>
+  +getIcon(name: String): AmenityIcon
+  +size(): int
+}
+
+AmenityIconFactory o-- AmenityIcon : cache
+FlyweightHandler ..> AmenityIconFactory
+FlyweightHandler ..> AmenityIcon
+@enduml

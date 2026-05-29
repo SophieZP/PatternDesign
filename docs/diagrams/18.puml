@@ -1,0 +1,36 @@
+@startuml
+title 18 - Memento
+skinparam classAttributeIconSize 0
+
+class MementoHandler {
+  +demo(): String
+}
+
+class Booking {
+  -checkIn: String
+  -checkOut: String
+  +Booking(checkIn: String, checkOut: String)
+  +setCheckIn(checkIn: String): void
+  +save(): BookingMemento
+  +restore(memento: BookingMemento): void
+  +summary(): String
+}
+
+class BookingMemento {
+  -checkIn: String
+  -checkOut: String
+  -BookingMemento(checkIn: String, checkOut: String)
+}
+
+class BookingHistory {
+  -states: Stack<BookingMemento>
+  +save(memento: BookingMemento): void
+  +undo(): BookingMemento
+}
+
+BookingHistory o-- BookingMemento
+Booking ..> BookingMemento
+MementoHandler ..> Booking
+MementoHandler ..> BookingHistory
+MementoHandler ..> BookingMemento
+@enduml

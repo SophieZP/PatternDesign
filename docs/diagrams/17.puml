@@ -1,0 +1,28 @@
+@startuml
+title 17 - Mediator
+skinparam classAttributeIconSize 0
+
+class MediatorHandler {
+  +demo(): String
+}
+
+class ChatRoomMediator {
+  -messages: List<String>
+  -users: List<User>
+  +register(user: User): void
+  +broadcast(sender: String, message: String): void
+  +history(): String
+}
+
+class User {
+  -name: String
+  -mediator: ChatRoomMediator
+  +User(name: String, mediator: ChatRoomMediator)
+  +send(message: String): void
+}
+
+ChatRoomMediator o-- User
+User --> ChatRoomMediator
+MediatorHandler ..> ChatRoomMediator
+MediatorHandler ..> User
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+title 07 - Bridge
+skinparam classAttributeIconSize 0
+
+class BridgeHandler {
+  +demo(): String
+}
+
+class Listing {
+  -city: String
+  -price: double
+  +Listing(city: String, price: double)
+}
+
+abstract class FilterImplementor {
+  +matches(listing: Listing, criteria: String): boolean
+}
+
+class ExactMatchImplementor {
+  +matches(listing: Listing, criteria: String): boolean
+}
+
+class RangeMatchImplementor {
+  +matches(listing: Listing, criteria: String): boolean
+}
+
+abstract class SearchFilter {
+  #implementor: FilterImplementor
+  #SearchFilter(implementor: FilterImplementor)
+  +apply(listings: List<Listing>, criteria: String): String
+}
+
+class PriceFilter {
+  +PriceFilter(implementor: FilterImplementor)
+  +apply(listings: List<Listing>, criteria: String): String
+}
+
+class LocationFilter {
+  +LocationFilter(implementor: FilterImplementor)
+  +apply(listings: List<Listing>, criteria: String): String
+}
+
+FilterImplementor <|-- ExactMatchImplementor
+FilterImplementor <|-- RangeMatchImplementor
+SearchFilter <|-- PriceFilter
+SearchFilter <|-- LocationFilter
+SearchFilter o-- FilterImplementor
+BridgeHandler ..> Listing
+BridgeHandler ..> PriceFilter
+BridgeHandler ..> LocationFilter
+BridgeHandler ..> ExactMatchImplementor
+BridgeHandler ..> RangeMatchImplementor
+@enduml

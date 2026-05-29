@@ -1,0 +1,30 @@
+@startuml
+title 08 - Composite
+skinparam classAttributeIconSize 0
+
+class CompositeHandler {
+  +demo(): String
+}
+
+abstract class PropertyComponent {
+  #name: String
+  #PropertyComponent(name: String)
+  +show(): String
+}
+
+class Room {
+  +show(): String
+}
+
+class PropertyGroup {
+  -children: List<PropertyComponent>
+  +add(component: PropertyComponent): void
+  +show(): String
+}
+
+PropertyComponent <|-- Room
+PropertyComponent <|-- PropertyGroup
+PropertyGroup *-- PropertyComponent : children
+CompositeHandler ..> PropertyGroup
+CompositeHandler ..> Room
+@enduml

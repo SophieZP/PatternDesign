@@ -1,0 +1,49 @@
+@startuml
+title 15 - Interpreter
+skinparam classAttributeIconSize 0
+
+class InterpreterHandler {
+  +demo(): String
+  -parse(query: String): SearchExpression
+  -parsePart(part: String): SearchExpression
+}
+
+class Listing {
+  -city: String
+  -price: double
+  +Listing(city: String, price: double)
+}
+
+abstract class SearchExpression {
+  +interpret(listings: List<Listing>): List<Listing>
+}
+
+class CityExpression {
+  -city: String
+  +CityExpression(city: String)
+  +interpret(listings: List<Listing>): List<Listing>
+}
+
+class PriceExpression {
+  -operator: String
+  -price: double
+  +PriceExpression(operator: String, price: double)
+  +interpret(listings: List<Listing>): List<Listing>
+}
+
+class AndExpression {
+  -left: SearchExpression
+  -right: SearchExpression
+  +AndExpression(left: SearchExpression, right: SearchExpression)
+  +interpret(listings: List<Listing>): List<Listing>
+}
+
+SearchExpression <|-- CityExpression
+SearchExpression <|-- PriceExpression
+SearchExpression <|-- AndExpression
+AndExpression o-- SearchExpression : left/right
+InterpreterHandler ..> SearchExpression
+InterpreterHandler ..> CityExpression
+InterpreterHandler ..> PriceExpression
+InterpreterHandler ..> AndExpression
+@enduml

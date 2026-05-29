@@ -1,0 +1,42 @@
+@startuml
+title 20 - State
+skinparam classAttributeIconSize 0
+
+class StateHandler {
+  +demo(): String
+}
+
+class Booking {
+  -state: BookingState
+  +pay(): String
+  +confirm(): String
+  +cancel(): String
+}
+
+abstract class BookingState {
+  #booking: Booking
+  #BookingState(booking: Booking)
+  +pay(): String
+  +cancel(): String
+  +status(): String
+}
+
+class PendingState {
+  +pay(): String
+  +cancel(): String
+  +status(): String
+}
+
+class ConfirmedState {
+  +pay(): String
+  +cancel(): String
+  +status(): String
+}
+
+BookingState <|-- PendingState
+BookingState <|-- ConfirmedState
+Booking o-- BookingState
+StateHandler ..> Booking
+StateHandler ..> PendingState
+StateHandler ..> ConfirmedState
+@enduml

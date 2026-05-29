@@ -1,0 +1,39 @@
+@startuml
+title 02 - Factory Method
+skinparam classAttributeIconSize 0
+
+class FactoryMethodHandler {
+  +demo(): String
+}
+
+abstract class Notification {
+  #message: String
+  #Notification(message: String)
+  +send(): String
+}
+
+class EmailNotification {
+  +send(): String
+}
+
+class PushNotification {
+  +send(): String
+}
+
+class SmsNotification {
+  +send(): String
+}
+
+class NotificationFactory {
+  +create(type: String, message: String): Notification
+}
+
+Notification <|-- EmailNotification
+Notification <|-- PushNotification
+Notification <|-- SmsNotification
+FactoryMethodHandler ..> NotificationFactory
+NotificationFactory ..> Notification
+NotificationFactory ..> EmailNotification
+NotificationFactory ..> PushNotification
+NotificationFactory ..> SmsNotification
+@enduml
