@@ -99,6 +99,9 @@ public class PatternServer {
 	}
 
 	private static String mapPath(String requestPath) {
+		if (requestPath.startsWith("/diagrams/rendered/")) {
+			return "docs" + requestPath;
+		}
 		if (requestPath.startsWith("/diagrams/")) {
 			return "docs" + requestPath;
 		}
@@ -143,6 +146,9 @@ public class PatternServer {
 		}
 		if (relativePath.endsWith(".puml")) {
 			return "text/plain; charset=UTF-8";
+		}
+		if (relativePath.endsWith(".png")) {
+			return "image/png";
 		}
 		return "application/octet-stream";
 	}

@@ -25,8 +25,8 @@ class ListingIterator {
   +remove(): void
 }
 
-ListingCollection ..|> Iterable<Listing>
-ListingIterator ..|> Iterator<Listing>
+ListingCollection ..|> Iterable
+ListingIterator ..|> Iterator
 ListingCollection o-- Listing
 ListingIterator o-- Listing
 IteratorHandler ..> ListingCollection

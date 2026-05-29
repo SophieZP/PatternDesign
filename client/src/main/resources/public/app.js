@@ -9,6 +9,7 @@ const landingView = document.getElementById('landingView');
 const detailView = document.getElementById('detailView');
 const selectedPatternName = document.getElementById('selectedPatternName');
 const selectedPatternDescription = document.getElementById('selectedPatternDescription');
+const diagramImage = document.getElementById('diagramImage');
 const diagramBox = document.getElementById('diagramBox');
 const backToCatalog = document.getElementById('backToCatalog');
 const openInApp = document.getElementById('openInApp');
@@ -67,13 +68,20 @@ const navigateToPattern = async (code, replace = false) => {
 
 const loadDiagram = async (code) => {
     diagramBox.textContent = 'Cargando diagrama...';
+    diagramImage.hidden = true;
+    diagramImage.removeAttribute('src');
     try {
+        diagramImage.src = `/diagrams/rendered/${code}.png`;
+        diagramImage.alt = `Diagrama renderizado del patrón ${code}`;
+        diagramImage.hidden = false;
+
         const response = await fetch(`/diagrams/${code}.puml`);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
         diagramBox.textContent = await response.text();
     } catch (error) {
+        diagramImage.hidden = true;
         diagramBox.textContent = `No se pudo cargar el diagrama: ${error.message}`;
     }
 };
