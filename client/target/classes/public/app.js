@@ -1,313 +1,828 @@
+// =========================
+// DOM
+// =========================
 const backendStatus = document.getElementById('backendStatus');
+
 const patternSelect = document.getElementById('patternSelect');
 const patternInput = document.getElementById('patternInput');
 const patternForm = document.getElementById('patternForm');
+
 const outputBox = document.getElementById('outputBox');
 const outputMeta = document.getElementById('outputMeta');
+
 const catalogGrid = document.getElementById('catalogGrid');
+
 const landingView = document.getElementById('landingView');
 const detailView = document.getElementById('detailView');
+
 const selectedPatternName = document.getElementById('selectedPatternName');
 const selectedPatternDescription = document.getElementById('selectedPatternDescription');
+
 const diagramImage = document.getElementById('diagramImage');
 const diagramBox = document.getElementById('diagramBox');
+
 const backToCatalog = document.getElementById('backToCatalog');
 const openInApp = document.getElementById('openInApp');
 
-// Tabs & app elements
 const catalogTab = document.getElementById('catalogTab');
 const appTab = document.getElementById('appTab');
+
 const catalogPanel = document.getElementById('catalogPanel');
 const appPanel = document.getElementById('appPanel');
+
 const appPatternBadge = document.getElementById('appPatternBadge');
-const appSearchButton = document.getElementById('appSearchButton');
-const appResetButton = document.getElementById('appResetButton');
+
 const appCity = document.getElementById('appCity');
 const appNights = document.getElementById('appNights');
 const appGuests = document.getElementById('appGuests');
 const appListings = document.getElementById('appListings');
+const reservationPanel =document.getElementById('reservationPanel');
+const toastContainer =document.getElementById('toastContainer');
+const appPatternDescription = document.getElementById('appPatternDescription');
+const executedPattern = document.getElementById('executedPattern');
 
+// =========================
+// STATE (CLAVE: separado)
+// =========================
 let patterns = [];
 let patternByCode = new Map();
-let currentPattern = null;
+let reservations = [];
+let reservationHistory = [];
 
-const getPatternFromUrl = () => new URLSearchParams(window.location.search).get('pattern');
+let selectedPattern = null; // catálogo + backend + UML
+let appPattern = null;      // mini app (Strategy)
 
-const showLanding = () => {
-    landingView.hidden = false;
-    detailView.hidden = true;
-    selectedPatternName.textContent = 'Patrón';
-    selectedPatternDescription.textContent = '';
-};
-
-const showDetail = (pattern) => {
-    landingView.hidden = true;
-    detailView.hidden = false;
-    selectedPatternName.textContent = `${pattern.code} - ${pattern.name}`;
-    selectedPatternDescription.textContent = pattern.description;
-    patternSelect.value = pattern.code;
-};
-
-const navigateToPattern = async (code, replace = false) => {
-    const pattern = patternByCode.get(code);
-    if (!pattern) {
-        return;
-    }
-
-    const url = new URL(window.location.href);
-    url.searchParams.set('pattern', code);
-    if (replace) {
-        window.history.replaceState({}, '', url);
-    } else {
-        window.history.pushState({}, '', url);
-    }
-
-    showDetail(pattern);
-    await loadDiagram(code);
-};
-
-const loadDiagram = async (code) => {
-    diagramBox.textContent = 'Cargando diagrama...';
-    diagramImage.hidden = true;
-    diagramImage.removeAttribute('src');
-    try {
-        diagramImage.src = `/diagrams/rendered/${code}.png`;
-        diagramImage.alt = `Diagrama renderizado del patrón ${code}`;
-        diagramImage.hidden = false;
-
-        const response = await fetch(`/diagrams/${code}.puml`);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        diagramBox.textContent = await response.text();
-    } catch (error) {
-        diagramImage.hidden = true;
-        diagramBox.textContent = `No se pudo cargar el diagrama: ${error.message}`;
-    }
-};
-
-const renderCatalog = (patterns) => {
-    patternSelect.innerHTML = '';
-    catalogGrid.innerHTML = '';
-
-    patterns.forEach((pattern) => {
-        const option = document.createElement('option');
-        option.value = pattern.code;
-        option.textContent = `${pattern.code} - ${pattern.name}`;
-        patternSelect.appendChild(option);
-
-        const card = document.createElement('article');
-        card.className = 'pattern-card';
-        card.tabIndex = 0;
-        card.role = 'button';
-        card.addEventListener('click', () => navigateToPattern(pattern.code));
-        card.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                navigateToPattern(pattern.code);
-            }
-        });
-        card.innerHTML = `
-            <div class="pattern-code">${pattern.code}</div>
-            <h3>${pattern.name}</h3>
-            <p>${pattern.description}</p>
-        `;
-        catalogGrid.appendChild(card);
-    });
-};
-
-const switchTab = (to) => {
-    if (to === 'app') {
-        catalogTab.setAttribute('aria-selected', 'false');
-        appTab.setAttribute('aria-selected', 'true');
-        catalogPanel.hidden = true;
-        appPanel.hidden = false;
-    } else {
-        catalogTab.setAttribute('aria-selected', 'true');
-        appTab.setAttribute('aria-selected', 'false');
-        catalogPanel.hidden = false;
-        appPanel.hidden = true;
-    }
-};
-
+// =========================
+// MOCK DATA
+// =========================
 const mockListings = [
     { id: 1, title: 'Apartamento Centro', city: 'Barcelona', price: 90, guests: 2 },
     { id: 2, title: 'Loft Moderno', city: 'Barcelona', price: 120, guests: 4 },
     { id: 3, title: 'Estudio Económico', city: 'Madrid', price: 60, guests: 2 },
 ];
 
-const patternAppConfigs = new Map();
-// Minimal per-pattern scenarios — used to adapt the embedded app UI
-patterns.forEach && patterns.clear; // noop to satisfy linters when patterns empty
-['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23'].forEach(code => {
-    patternAppConfigs.set(code, {
-        scenario: `Escenario hipotético para patrón ${code}`,
-        focus: 'default'
-    });
-});
+// =========================
+// STRATEGY (Mini App)
+// =========================
+const patternBehaviors = {
 
-const applyPatternToApp = (code) => {
-    currentPattern = patternByCode.get(code) || null;
-    appPatternBadge.textContent = currentPattern ? `${currentPattern.code} - ${currentPattern.name}` : 'Ningún patrón aplicado';
-    // adjust UI hints based on a few known patterns
-    const cfg = patternAppConfigs.get(code) || { scenario: 'Escenario genérico', focus: 'default' };
-    // show a small message in the listings area
-    renderAppListings();
-    const note = document.createElement('div');
-    note.style.color = 'var(--muted)';
-    note.style.marginTop = '8px';
-    note.textContent = cfg.scenario + ' — enfoque: ' + cfg.focus;
-    appPanel.querySelector('.app-form').after(note);
+    // 01 - Singleton
+    "01": (l) =>
+        l.map(x => ({
+            ...x,
+            instanceId: "SINGLETON-001"
+        })),
+
+    // 02 - Factory Method
+    "02": (l) =>
+        l.map(x => ({
+            ...x,
+            createdBy: "PropertyFactory"
+        })),
+
+    // 03 - Abstract Factory
+    "03": (l) =>
+        l.map(x => ({
+            ...x,
+            family: "Premium"
+        })),
+
+    // 04 - Builder
+    "04": (l) =>
+        l.map(x => ({
+            ...x,
+            built: true
+        })),
+
+    // 05 - Prototype
+    "05": (l) => [
+        ...l,
+        {
+            ...l[0],
+            id: 999,
+            title: l[0].title + " (Clon)",
+            cloned: true
+        }
+    ],
+
+    // 06 - Adapter
+    "06": (l) =>
+        l.map(x => ({
+            ...x,
+            adapted: true
+        })),
+
+    // 07 - Bridge
+    "07": (l) =>
+        l.map(x => ({
+            ...x,
+            bridgeMode: true
+        })),
+
+    // 08 - Composite
+    "08": (l) =>
+        l.map(x => ({
+            ...x,
+            group: "Luxury Collection"
+        })),
+
+    // 09 - Decorator
+    "09": (l) =>
+        l.map(x => ({
+            ...x,
+            wifi: true
+        })),
+
+    // 10 - Facade
+    "10": (l) =>
+        l.map(x => ({
+            ...x,
+            bookingSystem: "Facade API"
+        })),
+
+    // 11 - Flyweight
+    "11": (l) =>
+        l.map(x => ({
+            ...x,
+            icon: "🏠"
+        })),
+
+    // 12 - Proxy
+    "12": (l) =>
+        l.map(x => ({
+            ...x,
+            verified: true
+        })),
+
+    // 13 - Chain of Responsibility
+    "13": (l) =>
+        l.map(x => ({
+            ...x,
+            validationPassed: true
+        })),
+
+    // 14 - Command
+    "14": (l) =>
+        l.map(x => ({
+            ...x,
+            commandEnabled: true
+        })),
+
+    // 15 - Interpreter
+    "15": (l, f) =>
+        l.filter(x =>
+            !f.city ||
+            x.city.toLowerCase().includes(f.city)
+        ).map(x => ({
+            ...x,
+            queryParsed: true
+        })),
+
+    // 16 - Iterator
+    "16": (l) =>
+        l.map((x, index) => ({
+            ...x,
+            iteratorIndex: index + 1
+        })),
+
+    // 17 - Mediator
+    "17": (l) =>
+        l.map(x => ({
+            ...x,
+            mediatorConnected: true
+        })),
+
+    // 18 - Memento
+    "18": (l) =>
+        l.map(x => ({
+            ...x,
+            hasSnapshot: true
+        })),
+
+    // 19 - Observer
+    "19": (l) =>
+        l.map(x => ({
+            ...x,
+            subscribers: 3
+        })),
+
+    // 20 - State
+    "20": (l) =>
+        l.map(x => ({
+            ...x,
+            state: "Disponible"
+        })),
+
+    // 21 - Strategy
+    "21": (l, f) =>
+        l.filter(x =>
+            (!f.city ||
+                x.city.toLowerCase().includes(f.city)) &&
+            (!f.guests ||
+                x.guests >= f.guests)
+        ).map(x => ({
+            ...x,
+            strategy: "GuestFilter"
+        })),
+
+    // 22 - Template Method
+    "22": (l) =>
+        l.map(x => ({
+            ...x,
+            templateApplied: true
+        })),
+
+    // 23 - Visitor
+    "23": (l) =>
+        l.map(x => ({
+            ...x,
+            visitorApplied: true
+        }))
 };
 
-const renderAppListings = (filters = {}) => {
-    appListings.innerHTML = '';
-    const city = (filters.city || appCity.value || '').toLowerCase();
-    const nights = parseInt(filters.nights || appNights.value || 1, 10);
-    const guests = parseInt(filters.guests || appGuests.value || 1, 10);
+// =========================
+// OBSERVER
+// =========================
 
-    const results = mockListings.filter(l => {
-        if (city && !l.city.toLowerCase().includes(city)) return false;
-        if (guests && l.guests < guests) return false;
-        return true;
-    });
+const observers = [];
 
-    if (results.length === 0) {
-        appListings.innerHTML = '<div class="pattern-card">No hay resultados</div>';
+const subscribe = (fn) => {
+    observers.push(fn);
+};
+
+const notify = (data) => {
+    observers.forEach(fn => fn(data));
+};
+
+// =========================
+// TOASTS
+// =========================
+
+const showToast = (message) => {
+
+    const toast = document.createElement('div');
+
+    toast.style.background = '#222';
+    toast.style.color = '#fff';
+    toast.style.padding = '10px';
+    toast.style.marginBottom = '8px';
+    toast.style.borderRadius = '8px';
+
+    toast.textContent = message;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+};
+
+subscribe((reservation) => {
+
+    if (reservation.status === "cancelled") {
+
+        showToast(
+            `Reserva cancelada: ${reservation.listing.title}`
+        );
+
+    } else {
+
+        showToast(
+            `Reserva creada: ${reservation.listing.title}`
+        );
+
+    }
+});
+
+// =========================
+// COMMAND
+// =========================
+
+const reservationCommand = {
+
+    execute(listing, context) {
+
+        const reservation = {
+            id: Date.now(),
+            listing,
+            city: context.city,
+            guests: context.guests,
+            nights: context.nights,
+            status: "confirmed"
+        };
+
+        reservations.push(reservation);
+
+        reservationHistory.push(
+            structuredClone(reservation)
+        );
+
+        notify(reservation);
+
+        renderReservations();
+
+        return reservation;
+    },
+
+    undo(id) {
+
+        const index =
+            reservations.findIndex(
+                r => String(r.id) === String(id)
+            );
+
+        if (index === -1) return;
+
+        const removed =
+            reservations.splice(index, 1)[0];
+
+        notify({
+            ...removed,
+            status: "cancelled"
+        });
+
+        renderReservations();
+    }
+};
+
+// =========================
+// RESERVATIONS UI
+// =========================
+
+const renderReservations = () => {
+
+    reservationPanel.innerHTML =
+        '<h3>Reservas Activas</h3>';
+
+    if (!reservations.length) {
+
+        reservationPanel.innerHTML +=
+            '<p>No hay reservas.</p>';
+
         return;
     }
 
-    results.forEach(l => {
-        const card = document.createElement('article');
-        card.className = 'pattern-card';
-        card.innerHTML = `
-            <div class="pattern-code">L${l.id}</div>
-            <h3>${l.title}</h3>
-            <p>${l.city} · $${l.price} por noche</p>
-            <div style="display:flex;gap:8px;margin-top:8px">
-                <button data-id="${l.id}" class="secondary-button appView">Ver</button>
-                <button data-id="${l.id}" class="appUse">Usar</button>
-            </div>
+    reservations.forEach(r => {
+
+        const div =
+            document.createElement('div');
+
+        div.className = 'pattern-card';
+
+        div.innerHTML = `
+            <strong>${r.listing.title}</strong>
+
+            <p>
+                ${r.city}
+                · ${r.guests} huéspedes
+                · ${r.nights} noches
+            </p>
+
+            <small>${r.status}</small>
+
+            <br><br>
+
+            <button data-id="${r.id}">
+                Cancelar
+            </button>
         `;
-        appListings.appendChild(card);
+
+        div.querySelector('button')
+            .onclick = () => {
+
+                reservationCommand.undo(r.id);
+
+            };
+
+        reservationPanel.appendChild(div);
     });
-    // wire actions
-    appListings.querySelectorAll('.appView').forEach(btn => btn.addEventListener('click', (e) => {
-        const id = e.target.getAttribute('data-id');
-        const l = mockListings.find(x => String(x.id) === id);
-        alert(`Ver ${l.title} — (demo)`);
-    }));
-    appListings.querySelectorAll('.appUse').forEach(btn => btn.addEventListener('click', (e) => {
-        const id = e.target.getAttribute('data-id');
-        // when a listing is used, if a pattern is applied navigate to its detail
-        if (currentPattern) {
-            navigateToPattern(currentPattern.code);
-            switchTab('catalog');
-            showDetail(currentPattern);
-        } else {
-            alert('Aplica primero un patrón desde el catálogo.');
-        }
-    }));
 };
 
-const loadCatalog = async () => {
-    try {
-        const response = await fetch('/data/patterns.json');
-        const payload = await response.json();
-        patterns = payload.patterns || [];
-        patternByCode = new Map(patterns.map((pattern) => [pattern.code, pattern]));
-        renderCatalog(patterns);
-        backendStatus.textContent = 'Listo';
-    } catch (error) {
-        backendStatus.textContent = 'Sin datos';
-        outputBox.textContent = `No se pudo cargar el catálogo: ${error.message}`;
-    }
-};
-
+// =========================
+// BACKEND STATUS
+// =========================
 const checkBackend = async () => {
     try {
-        const response = await fetch('/api/patterns');
-        const payload = await response.json();
-        backendStatus.textContent = `Activo (${payload.patterns.length} patrones)`;
-    } catch (error) {
+        const res = await fetch('/api/patterns');
+        const data = await res.json();
+        backendStatus.textContent = `Activo (${data.patterns.length} patrones)`;
+    } catch {
         backendStatus.textContent = 'Desconectado';
     }
 };
 
-patternForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const requestBody = {
-        pattern: patternSelect.value,
-        input: patternInput.value
-    };
+// =========================
+// LOAD CATALOG
+// =========================
+const loadCatalog = async () => {
+    try {
+        const res = await fetch('/data/patterns.json');
+        const data = await res.json();
 
-    outputBox.textContent = 'Ejecutando patrón...';
-    outputMeta.textContent = '';
+        patterns = data.patterns;
+        patternByCode = new Map(patterns.map(p => [p.code, p]));
+
+        renderCatalog();
+    } catch (err) {
+        outputBox.textContent = "Error cargando catálogo";
+        console.error(err);
+    }
+};
+
+// =========================
+// CATALOG RENDER
+// =========================
+const renderCatalog = () => {
+    catalogGrid.innerHTML = '';
+    patternSelect.innerHTML = '';
+
+    patterns.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.code;
+        opt.textContent = `${p.code} - ${p.name}`;
+        patternSelect.appendChild(opt);
+
+        const card = document.createElement('article');
+        card.className = 'pattern-card';
+        card.innerHTML = `
+            <div class="pattern-code">${p.code}</div>
+            <h3>${p.name}</h3>
+            <p>${p.description}</p>
+        `;
+
+        card.onclick = () => navigateToPattern(p.code);
+        catalogGrid.appendChild(card);
+    });
+};
+
+// =========================
+// DETAIL VIEW
+// =========================
+const showDetail = (p) => {
+    landingView.hidden = true;
+    detailView.hidden = false;
+
+    selectedPatternName.textContent = `${p.code} - ${p.name}`;
+    selectedPatternDescription.textContent = p.description;
+
+    patternSelect.value = p.code;
+};
+
+const showLanding = () => {
+    landingView.hidden = false;
+    detailView.hidden = true;
+};
+
+// =========================
+// NAVIGATION + UML
+// =========================
+const navigateToPattern = async (code) => {
+    const pattern = patternByCode.get(code);
+    if (!pattern) return;
+
+    selectedPattern = pattern;
+
+    showDetail(pattern);
+    loadDiagram(code);
+};
+
+// =========================
+// UML LOADER (FIX FINAL)
+// =========================
+const loadDiagram = async (code) => {
+
+    diagramImage.src =
+        `/diagrams/rendered/${code}.png`;
+
+    diagramImage.hidden = false;
 
     try {
-        const response = await fetch('/api/patterns/run', {
+
+        const res =
+            await fetch(`/diagrams/${code}.puml`);
+
+        if (res.ok) {
+            diagramBox.textContent =
+                await res.text();
+        }
+
+    } catch {
+
+        diagramBox.textContent =
+            'No se pudo cargar el PUML';
+
+    }
+};
+
+// =========================
+// BACKEND EXECUTION (ESTABLE)
+// =========================
+patternForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!selectedPattern) return;
+
+    outputBox.textContent = "Ejecutando...";
+    outputMeta.textContent = "";
+
+    try {
+        const res = await fetch('/api/patterns/run', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                pattern: selectedPattern.code,
+                input: patternInput.value
+            })
         });
-        const payload = await response.json();
-        outputBox.textContent = JSON.stringify(payload, null, 2);
-        outputMeta.textContent = payload.success ? 'Ejecución correcta' : 'Ejecución con error';
-        await checkBackend();
-    } catch (error) {
-        outputBox.textContent = `Error ejecutando el backend: ${error.message}`;
-        outputMeta.textContent = 'Falló la llamada al servidor';
+
+        const data = await res.json();
+
+        outputBox.textContent = JSON.stringify(data, null, 2);
+        outputMeta.textContent = data.success ? "OK" : "Error";
+
+        if (executedPattern) {
+            executedPattern.textContent = `Patrón ejecutado: ${selectedPattern.name}`;
+        }
+
+        loadDiagram(selectedPattern.code);
+        checkBackend();
+
+    } catch (err) {
+        outputBox.textContent = err.message;
     }
 });
 
-patternSelect.addEventListener('change', () => {
-    if (detailView.hidden) {
+// =========================
+// MINI APP
+// =========================
+const renderAppListings = () => {
+
+    appListings.innerHTML = '';
+
+    const city = appCity.value.toLowerCase();
+    const guests = parseInt(appGuests.value || 1);
+
+    let data = mockListings;
+
+    const behavior =
+        appPattern
+            ? patternBehaviors[appPattern.code]
+            : null;
+
+    if (behavior) {
+        data = behavior(data, { city, guests });
+    }
+
+    if (!data.length) {
+
+        appListings.innerHTML =
+            `<div class="pattern-card">Sin resultados</div>`;
+
         return;
     }
-    navigateToPattern(patternSelect.value, true);
-});
 
-backToCatalog.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete('pattern');
-    window.history.pushState({}, '', url);
+    data.forEach(l => {
+
+        const card =
+            document.createElement('article');
+
+        card.className = 'pattern-card';
+
+        const title =
+            l.title || l.name || "Sin nombre";
+
+        const listingCity =
+            l.city || "N/A";
+
+        const price =
+            l.price || l.cost || 0;
+
+            let extras = '';
+
+            if (l.instanceId)
+                extras += `<p>Singleton: ${l.instanceId}</p>`;
+
+            if (l.createdBy)
+                extras += `<p>Factory: ${l.createdBy}</p>`;
+
+            if (l.family)
+                extras += `<p>Familia: ${l.family}</p>`;
+
+            if (l.built)
+                extras += `<p>🔨 Construido con Builder</p>`;
+
+            if (l.cloned)
+                extras += `<p>🧬 Clonado desde Prototype</p>`;
+
+            if (l.adapted)
+                extras += `<p>🔌 Adaptado</p>`;
+
+            if (l.bridgeMode)
+                extras += `<p>🌉 Bridge activo</p>`;
+
+            if (l.group)
+                extras += `<p>📦 Grupo: ${l.group}</p>`;
+
+            if (l.wifi)
+                extras += `<p>📶 Wifi incluido</p>`;
+
+            if (l.bookingSystem)
+                extras += `<p>⚙️ ${l.bookingSystem}</p>`;
+
+            if (l.icon)
+                extras += `<p>${l.icon} Flyweight</p>`;
+
+            if (l.verified)
+                extras += `<p>🛡️ Verificado por Proxy</p>`;
+
+            if (l.validationPassed)
+                extras += `<p>✅ Validado</p>`;
+
+            if (l.commandEnabled)
+                extras += `<p>⌨️ Command habilitado</p>`;
+
+            if (l.queryParsed)
+                extras += `<p>📝 Consulta interpretada</p>`;
+
+            if (l.iteratorIndex !== undefined)
+                extras += `<p>🔄 Posición ${l.iteratorIndex}</p>`;
+
+            if (l.mediatorConnected)
+                extras += `<p>🤝 Mediator conectado</p>`;
+
+            if (l.hasSnapshot)
+                extras += `<p>💾 Snapshot disponible</p>`;
+
+            if (l.subscribers)
+                extras += `<p>👀 Observadores: ${l.subscribers}</p>`;
+
+            if (l.state)
+                extras += `<p>📍 Estado: ${l.state}</p>`;
+
+            if (l.strategy)
+                extras += `<p>🎯 Estrategia: ${l.strategy}</p>`;
+
+            if (l.templateApplied)
+                extras += `<p>📋 Template Method aplicado</p>`;
+
+            if (l.visitorApplied)
+                extras += `<p>🚶 Visitor ejecutado</p>`;
+
+        card.innerHTML = `
+            <h3>${title}</h3>
+            <p>${listingCity} - $${price}</p>
+
+            ${extras}
+
+            <button class="reserveBtn">
+                Reservar
+            </button>
+        `;
+
+        card.querySelector('.reserveBtn')
+            .onclick = () => {
+
+                reservationCommand.execute(
+                    l,
+                    {
+                        city: listingCity,
+                        guests: l.guests || guests,
+                        nights: Number(appNights.value)
+                    }
+                );
+
+            };
+
+        appListings.appendChild(card);
+    });
+};
+
+// =========================
+// APPLY PATTERN (MINI APP)
+// =========================
+
+const applyPatternToApp = (code) => {
+
+    const pattern = patternByCode.get(code);
+
+    if (!pattern) return;
+
+    appPattern = pattern;
+
+    appPatternBadge.textContent =
+        `${pattern.code} - ${pattern.name}`;
+
+    if (appPatternDescription) {
+        appPatternDescription.textContent =
+            pattern.description;
+    }
+
+    const oldInfo =
+        document.getElementById('patternInfo');
+
+    if (oldInfo) oldInfo.remove();
+
+    const info = document.createElement('div');
+
+    info.id = 'patternInfo';
+    info.className = 'pattern-card';
+
+    info.innerHTML = `
+        <h3>${pattern.name}</h3>
+        <p>${pattern.description}</p>
+    `;
+
+    appListings.before(info);
+
+    renderAppListings();
+
+};
+
+// =========================
+// EVENTS
+// =========================
+patternSelect.onchange = () => {
+    navigateToPattern(patternSelect.value);
+};
+
+backToCatalog.onclick = () => {
+
     showLanding();
-});
 
-openInApp.addEventListener('click', () => {
-    // switch to the embedded app and apply the currently selected pattern
-    const code = patternSelect.value || getPatternFromUrl();
-    if (!code) {
-        alert('Selecciona primero un patrón.');
-        return;
-    }
-    applyPatternToApp(code);
+    selectedPattern = null;
+
+    selectedPatternName.textContent = 'Patrón';
+    selectedPatternDescription.textContent = '';
+
+    diagramImage.hidden = true;
+
+    diagramBox.textContent =
+        'Selecciona un patrón para ver su diagrama.';
+};
+openInApp.onclick = () => {
+    if (!selectedPattern) return;
+
+    applyPatternToApp(selectedPattern.code);
     switchTab('app');
-});
+};
 
-catalogTab.addEventListener('click', () => switchTab('catalog'));
-appTab.addEventListener('click', () => switchTab('app'));
+catalogTab.onclick = () => switchTab('catalog');
+appTab.onclick = () => {
 
-appSearchButton.addEventListener('click', () => renderAppListings({ city: appCity.value, nights: appNights.value, guests: appGuests.value }));
-appResetButton.addEventListener('click', () => { appCity.value=''; appNights.value=2; appGuests.value=2; renderAppListings(); });
+    switchTab('app');
 
-window.addEventListener('popstate', () => {
-    const code = getPatternFromUrl();
-    if (code && patternByCode.has(code)) {
-        showDetail(patternByCode.get(code));
-        loadDiagram(code);
-    } else {
-        showLanding();
+    if (!appPattern) {
+
+        appPatternBadge.textContent =
+            'Selecciona un patrón desde el catálogo';
+
+        renderAppListings();
     }
-});
+};
 
+document.getElementById('appSearchButton')
+    .onclick = renderAppListings;
+
+document.getElementById('appResetButton')
+    .onclick = () => {
+
+        console.log("RESET");
+
+        appCity.value = '';
+        appNights.value = 2;
+        appGuests.value = 2;
+
+        appPattern = null;
+
+        appPatternBadge.textContent =
+            'Ningún patrón aplicado';
+
+        const info =
+            document.getElementById('patternInfo');
+
+        if (info) {
+            info.remove();
+        }
+
+        renderAppListings();
+
+    };
+
+// =========================
+// TABS
+// =========================
+const switchTab = (tab) => {
+    catalogPanel.hidden = tab !== 'catalog';
+    appPanel.hidden = tab !== 'app';
+};
+
+// =========================
+// INIT
+// =========================
 loadCatalog().then(() => {
-    const code = getPatternFromUrl();
-    if (code && patternByCode.has(code)) {
-        showDetail(patternByCode.get(code));
-        loadDiagram(code);
-    } else {
-        showLanding();
-    }
+
     checkBackend();
+
+    renderReservations();
+
 });
