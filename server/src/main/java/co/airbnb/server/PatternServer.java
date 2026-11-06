@@ -1,10 +1,5 @@
 package co.airbnb.server;
 
-import co.airbnb.shared.JsonMessage;
-import co.airbnb.shared.JsonParser;
-import co.airbnb.shared.PatternType;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,6 +11,13 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
+
+import co.airbnb.shared.JsonMessage;
+import co.airbnb.shared.JsonParser;
+import co.airbnb.shared.PatternType;
 
 public class PatternServer {
 
@@ -65,7 +67,8 @@ public class PatternServer {
 		JsonMessage requestMessage = JSON_PARSER.fromJson(requestBody);
 		PatternType patternType = PatternType.fromValue(requestMessage.getPattern());
 		if (patternType == null) {
-			sendJson(exchange, 400, JSON_PARSER.toJson(JsonMessage.failure(requestMessage.getPattern(), requestMessage.getInput(), "Patrón no válido")));
+			sendJson(exchange, 400, JSON_PARSER.toJson(
+					JsonMessage.failure(requestMessage.getPattern(), requestMessage.getInput(), "Patrón no válido")));
 			return;
 		}
 		String result = ROUTER.run(patternType.getCode());
@@ -114,6 +117,7 @@ public class PatternServer {
 	private static Path resolveResource(String relativePath) {
 		List<Path> candidates = Arrays.asList(
 				Paths.get(relativePath),
+				Paths.get("PatternDesign", "client", "src", "main", "resources", relativePath),
 				Paths.get("client", "src", "main", "resources", relativePath),
 				Paths.get("docs", relativePath),
 				Paths.get("glud-patterns", "client", "src", "main", "resources", relativePath),
@@ -165,7 +169,8 @@ public class PatternServer {
 		sendTextWithType(exchange, statusCode, body, "text/plain; charset=UTF-8");
 	}
 
-	private static void sendTextWithType(HttpExchange exchange, int statusCode, String body, String contentType) throws IOException {
+	private static void sendTextWithType(HttpExchange exchange, int statusCode, String body, String contentType)
+			throws IOException {
 		byte[] content = body.getBytes(StandardCharsets.UTF_8);
 		exchange.getResponseHeaders().set("Content-Type", contentType);
 		exchange.sendResponseHeaders(statusCode, content.length);
